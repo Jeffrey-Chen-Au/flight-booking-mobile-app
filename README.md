@@ -64,11 +64,10 @@ Search → Results → Details → Booking → Passenger → Confirmation
 
 ## 📱 Screenshots
 
-(Add your cleaned screenshots here)
-
-![Search](./assets/search.png)
-![Results](./assets/results.png)
-![Booking](./assets/booking.png)
+<p align="center">
+  <img src="./assets/search.png" width="250"/>
+  <img src="./assets/results.png" width="250"/>
+</p>
 
 ---
 
