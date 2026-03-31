@@ -1,185 +1,199 @@
 # Flight Booking Mobile App
 
-> 📱 A production mobile application for flight search and booking,
-> built with React Native Expo and integrated with an existing backend
+> 📱 Production-grade mobile application for flight search and booking,
+> built with React Native (Expo) and integrated with a legacy backend
 > system.
 
 ------------------------------------------------------------------------
 
 ## 🚀 Overview
 
-This project is a **mobile flight booking application** designed for a
-real-world travel business (name anonymized for confidentiality).
+This project is a **real-world flight booking application** designed for
+a travel business (name anonymized).
 
 The app supports:
 
--   flight search\
--   price-based result listing\
--   booking flow\
+-   unified flight search\
+-   mixed inventory (internal deals + agent tickets)\
+-   multi-path booking flows\
 -   passenger management\
 -   order tracking
-
-It integrates with an existing backend system to handle flight data,
-bookings, and payments.
 
 ------------------------------------------------------------------------
 
 ## 🏗️ System Architecture
 
-Mobile App (React Native) ↓ API Layer (PHP Backend) ↓ MySQL Database
-
-Additional services: - Firebase Authentication → user identity\
-- Firebase Analytics → event tracking\
-- Expo Notifications → push notifications
+![Architecture Diagram](./docs/architecture_level2.png)
 
 ------------------------------------------------------------------------
 
 ## ✈️ Features
 
 -   🔍 Flight search (origin, destination, date, passengers)\
--   💰 Sorted flight results (price-based)\
--   📄 Flight details (layovers, baggage, airline info)\
--   🧾 Multi-step booking flow\
--   👤 Passenger management (adults, children, infants)\
--   📦 Order history and tracking
+-   💰 Mixed results (internal deals + agent tickets)\
+-   📄 Flight details with branching logic\
+-   🧾 Multi-step booking flows\
+-   👤 Passenger management\
+-   📦 Order tracking
 
 ------------------------------------------------------------------------
 
 ## 🔄 User Flow
 
-Search → Results → Details → Booking → Passenger → Confirmation
+Search → Results → Details → (Branch)
 
--   Users can browse flights without logging in\
--   Authentication is required before completing a booking\
--   Booking flow follows validation + step-based input
-
-------------------------------------------------------------------------
-
-## 🔄 Data Flow (Booking Example)
-
-1.  User searches flights\
-    → request sent to backend API
-
-2.  Backend aggregates:
-
-    -   internal deals\
-    -   external APIs
-
-3.  Response normalized → sent to app
-
-4.  User selects flight\
-    → booking payload created
-
-5.  Backend validates + creates order
-
-6.  Confirmation returned → UI updated
+-   Internal Deal → Web Checkout\
+-   Agent Ticket → Native Booking Flow
 
 ------------------------------------------------------------------------
 
-## ⚙️ Tech Stack
+## 🔀 Booking Flow Overview
 
-### Frontend
-
--   React Native (Expo)\
--   Expo Router\
--   Expo Notifications
-
-### Backend (External System)
-
--   PHP-based backend (existing system)\
--   MySQL database\
--   Shared with web platform
-
-### Authentication & Analytics
-
--   Firebase Authentication (Email, Phone, Google, Apple)\
--   Google Analytics
-
-### Build & Deployment
-
--   Expo EAS Build
+- Shared search experience
+- Branching at detail stage:
+  - Internal Deals → Web Checkout
+  - Agent Tickets → Native Booking Flow
 
 ------------------------------------------------------------------------
 
-## 🧠 Technical Highlights
+## 🧩 Booking Architecture
 
-### 1. Unified Flight Data Handling
+### Shared Discovery Flow
 
--   Integrated multiple flight data sources\
--   Normalized inconsistent schemas into unified model
+`flightresults → flightdetails`
 
-### 2. Booking Flow Integration
+-   Results include both internal deals and agent-backed tickets\
+-   Branching occurs at the detail screen
 
--   Aligned mobile flow with existing web system\
--   Maintained backend compatibility
+------------------------------------------------------------------------
 
-### 3. Authentication Strategy
+### 1. Internal Deal Flow (Gdeals)
 
--   Optional login for browsing\
--   Required before booking\
--   Synced Firebase identity with backend
+`flightresults → flightdetails → webview checkout`
 
-### 4. Environment Management
+-   Native browsing experience\
+-   Checkout handled via WebView\
+-   Shared session between app and web\
+-   Uses existing backend + database
 
--   Separate dev & production environments\
--   .env configuration\
--   EAS build profiles
+------------------------------------------------------------------------
+
+### 2. Agent API Flow (Ypsilon)
+
+`flightresults → flightdetails → flightbooking → flightpassenger → flightconfirm`
+
+-   Fully native booking experience\
+-   App communicates with backend\
+-   Backend communicates with agent APIs\
+-   Multi-step validation and passenger input
+
+------------------------------------------------------------------------
+
+## 🔄 Data Flow (Agent Booking Example)
+
+1.  User selects flight → app creates booking payload\
+2.  App sends request → backend API\
+3.  Backend:
+    - validates request\
+    - calls external agent API\
+    - transforms and normalizes provider responses
+4.  Response normalized into unified format\
+5.  Booking stored in database\
+6.  Confirmation returned → app updates UI
+
+------------------------------------------------------------------------
+
+## 🧠 Key Design Decisions
+
+### WebView vs Native Checkout
+
+-   Reused existing web checkout to avoid duplicating complex business
+    logic\
+-   Ensured consistency with web platform\
+-   Reduced development risk
+
+### Backend-Mediated API Integration
+
+-   Prevented direct client-to-provider communication\
+-   Centralized API logic and error handling
+
+### Branching Architecture
+
+-   Unified search experience\
+-   Deferred complexity to detail stage
 
 ------------------------------------------------------------------------
 
 ## ⚠️ Engineering Challenges
 
-### Legacy Backend Constraints
+### Mixed Inventory Handling
 
--   Backend not mobile-first\
--   Required adaptation of APIs
+-   Unified UI across different ticket types\
+-   Preserved different booking behaviors
 
-### Data Normalization
+### Flow Branching
 
--   Multiple inconsistent provider schemas\
--   Built unified frontend model
+-   Managed routing and state across divergent flows
 
-### State Consistency
+### Hybrid Web + Native Checkout
 
--   Prevented invalid booking states\
--   Managed multi-step flow reliability
+-   Maintained session continuity across app and WebView
 
-### Auth Boundary
+### Backend-Mediated APIs
 
--   Firebase vs backend session mismatch\
--   Implemented identity synchronization
+-   Centralized provider integration in backend
+
+------------------------------------------------------------------------
+
+## ⚠️ Failure Handling
+
+-   Prevented duplicate submissions using request locking\
+-   Managed API failures with retry and error states\
+-   Preserved state across navigation steps\
+-   Handled partial failures with clear user feedback
 
 ------------------------------------------------------------------------
 
 ## 📊 Production Considerations
 
--   Handled real booking transactions\
--   Prevented duplicate submissions\
--   Managed API latency and loading states\
--   Ensured consistency with web system
+-   Real transaction handling\
+-   API latency management\
+-   UX loading states\
+-   Consistency with web platform
 
 ------------------------------------------------------------------------
 
 ## 🔧 Future Improvements
 
--   Introduce BFF (Backend-for-Frontend) layer\
--   Improve caching strategy\
--   Add offline support\
--   Enhance analytics tracking
+-   Introduce BFF layer\
+-   Add caching for search results\
+-   Improve analytics tracking\
+-   Add offline handling
+
+------------------------------------------------------------------------
+
+## 🔍 Retrospective
+
+-   Would introduce BFF earlier\
+-   Improve backend response standardization\
+-   Reduce frontend normalization complexity
 
 ------------------------------------------------------------------------
 
 ## ⚠️ Notes
 
--   Architecture and implementation overview only\
--   Backend system not included\
--   Sensitive data removed
+-   Architecture-focused repository\
+-   Sensitive logic removed\
+-   Backend not included
 
 ------------------------------------------------------------------------
 
 ## 👤 Author
 
-Mobile engineer experienced in: - production mobile applications\
-- booking systems\
-- React Native + Firebase\
-- legacy backend integrations
+Mobile engineer specializing in:
+
+-   React Native (Expo)\
+-   Firebase integration\
+-   Booking systems\
+-   Legacy backend integration
+
