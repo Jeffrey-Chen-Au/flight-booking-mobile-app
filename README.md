@@ -1,6 +1,6 @@
 # Flight Booking Mobile App
 
-> 📱 A production mobile application for flight search and booking, built with React Native and integrated with an existing backend system.
+> 📱 A production mobile application for flight search and booking, built with React Native Expo and integrated with an existing backend system.
 
 ---
 
